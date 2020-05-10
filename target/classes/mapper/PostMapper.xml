@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinasofti.postbar.mapper.PostMapper">
+	
+	<resultMap id="BaseResultMap" type="com.chinasofti.postbar.pojo.PostDto">
+		<id column="postUUID" property="postUUID" jdbcType="VARCHAR" />
+		<result column="postPageviews" property="postPageviews" jdbcType="VARCHAR" />
+		<result column="commentNum" property="commentNum" jdbcType="VARCHAR" />
+		<result column="postTitle" property="postTitle" jdbcType="VARCHAR" />
+		<result column="userName" property="userName" jdbcType="VARCHAR" />
+		<result column="postTime" property="postTime" jdbcType="VARCHAR" />
+		<result column="cmTime" property="cmTime" jdbcType="VARCHAR" />
+		<result column="cmPrNum" property="cmPrNum" jdbcType="VARCHAR" />
+	</resultMap>
+
+	
+	<!-- 根据分页数据pageIndex everyPageDataCount 和postTitle查询数据 -->
+	<select id="selectPostList" parameterType="Map" resultMap="BaseResultMap">
+	SELECT
+	t.`postUUID` AS postUUID ,
+	t.`postPageviews` AS postPageviews,
+	COUNT(*) AS commentNum,
+	t.`postTitle` AS postTitle,
+	u.`userName` AS userName,
+	t.`postTime` AS postTime,
+	MAX(cm.`cmTime`) AS cmTime
+	FROM pb_comment cm RIGHT JOIN pb_post t
+	ON cm.`postUUID`=t.`postUUID`
+	LEFT JOIN pb_user u
+	ON u.`userUUID`=t.`userUUID`
+	<if test="postTitle!=null and postTitle!=''">
+		where t.`postTitle`  LIKE  CONCAT('%',#{postTitle},'%')
+		<if test="userUUID!=null and userUUID!=''">
+		AND t.`userUUID`=#{userUUID}
+	   </if>
+	</if>	
+	<if test="postTitle==null or postTitle==''">
+		<if test="userUUID!=null and userUUID!=''">
+		where t.`userUUID`=#{userUUID}
+	   </if>
+	</if>		
+    GROUP BY t.`postUUID`
+	limit #{pageIndex},#{everyPageDataCount}
+	</select>
+	
+	
+	<select id="getPostAllNum"  parameterType="Map" resultType="java.lang.Integer">
+	SELECT COUNT(*) FROM
+    pb_post	
+    <if test="postTitle!=null and postTitle!=''">
+		where postTitle LIKE  CONCAT('%',#{postTitle},'%')
+		<if test="userUUID!=null and userUUID!=''">
+		AND userUUID=#{userUUID}
+	   </if>
+	</if>	
+	<if test="postTitle==null or postTitle==''">
+		<if test="userUUID!=null and userUUID!=''">
+		where userUUID=#{userUUID}
+	   </if>
+	</if>
+	</select>
+
+		<delete id="deletePost" >
+		DELETE 
+		  pt,
+		  cm,
+		  cp,
+		  pp 
+		FROM
+		  pb_post pt 
+		  LEFT JOIN pb_comment cm 
+		    ON pt.`postUUID` = cm.`postUUID` 
+		  LEFT JOIN pb_comment_praise cp 
+		    ON pt.`postUUID` = cp.`postUUID` 
+		  LEFT JOIN pb_post_praise pp 
+		    ON pp.`postUUID` = pt.`postUUID` 
+		WHERE pt.postUUID in
+		<foreach item='item' index='index' collection='postUUID' open='(' separator=',' close=')'>
+		    #{item}
+		 </foreach>
+		</delete>
+	<select id="selectApp" resultType="com.chinasofti.postbar.pojo.AppDto">
+        Select * from pb_app where id=1;
+    </select>
+		 
+	<insert id="addPost">
+INSERT INTO pb_post (postUUID,userUUID,postTitle,postText,postPageviews,postAudio,postTime) VALUES(#{postUUID},#{userUUID},#{postTitle},#{postText},#{postPageviews},#{postAudio},#{postTime})
+    </insert>
+	<select id="getPostByuuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT * FROM pb_post WHERE postUUID=#{postUUID};
+    </select>
+	<!-- 阅读数+1-->
+	<update id="getPageViews" parameterType="java.lang.String">
+        UPDATE pb_post SET postPageviews=postPageviews+1 WHERE postUUID=#{postUUID};
+    </update>
+</mapper>

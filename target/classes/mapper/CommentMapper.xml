@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinasofti.postbar.mapper.CommentMapper">
+	
+	<resultMap id="BaseResultMap" type="com.chinasofti.postbar.pojo.CommentDto">
+		<id column="cmUUID" property="cmUUID" jdbcType="VARCHAR" />
+		<result column="regPhoto" property="regPhoto" jdbcType="VARCHAR" />
+		<result column="cmText" property="cmText" jdbcType="VARCHAR" />
+		<result column="userName" property="userName" jdbcType="VARCHAR" />
+		<result column="cmAudio" property="cmAudio" jdbcType="VARCHAR" />
+		<result column="regTime" property="regTime" jdbcType="VARCHAR" />
+		<result column="cmTime" property="cmTime" jdbcType="VARCHAR" />
+		<result column="cmPrNum" property="cmPrNum" jdbcType="VARCHAR" />
+		<result column="postUUID" property="postUUID" jdbcType="VARCHAR" />
+		<result column="postTitle" property="postTitle" jdbcType="VARCHAR" />
+	</resultMap>
+
+<!--获取所有热评-->
+	<select id="getAllListByuuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+			SELECT 
+		  reg.`regPhoto` AS regPhoto,
+		  u.`userName` AS userName,
+		  reg.`regTime` AS regTime,
+		  cm.`cmTime` AS cmTime,
+		  cm.`cmText` AS cmText,
+		  cm.`cmUUID` AS cmUUID,
+		  cm.`cmAudio` AS cmAudio,
+		  cm.`postUUID` AS postUUID,
+		 		  (SELECT 
+		    COUNT(*) 
+		  FROM
+		    pb_comment_praise cp 
+		  WHERE cp.`cmUUID` = cm.`cmUUID` 
+		    AND cp.`userUUID` = reg.`userUUID`) AS cmPrNum 
+		   FROM
+		  pb_comment cm 
+		  LEFT JOIN pb_post pt 
+		    ON cm.`postUUID` = pt.`postUUID` 
+		  LEFT JOIN pb_register reg 
+		    ON reg.`userUUID` = pt.`userUUID` 
+		  LEFT JOIN pb_user u 
+		    ON u.`userUUID` = reg.`userUUID` 
+		WHERE cm.postUUID =#{uuid}
+	</select>
+
+	<!-- 获取热评-->
+	<select id="getHotlistByPostuuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+				SELECT 
+		  reg.`regPhoto` AS regPhoto,
+		  u.`userName` AS userName,
+		  reg.`regTime` AS regTime,
+		  cm.`cmTime` AS cmTime,
+		  cm.`cmText` AS cmText,
+		  cm.`cmUUID` AS cmUUID,
+		  cm.`cmAudio` AS cmAudio,
+		  (SELECT 
+		    COUNT(*) 
+		  FROM
+		    pb_comment_praise cp 
+		  WHERE cp.`cmUUID` = cm.`cmUUID` 
+		    AND cp.`userUUID` = reg.`userUUID`) AS cmPrNum 
+		FROM
+		  pb_comment cm 
+		  LEFT JOIN pb_post pt 
+		    ON cm.`postUUID` = pt.`postUUID` 
+		  LEFT JOIN pb_register reg 
+		    ON reg.`userUUID` = pt.`userUUID` 
+		  LEFT JOIN pb_user u 
+		    ON u.`userUUID` = reg.`userUUID` 
+		WHERE cm.postUUID = #{postUUID}
+		HAVING ( cmPrNum>0) ORDER BY cmPrNum DESC LIMIT 5;
+	</select>
+	<!--获取我的评论列表-->
+	<select id="selectComList"    resultMap="BaseResultMap">
+			SELECT 
+		   cm.`cmText` AS cmText,
+		  cm.`cmTime` AS cmTime,
+		  cm.`cmUUID` AS cmUUID,
+		  cm.`cmAudio` AS cmAudio,
+		  cm.`postUUID`  AS postUUID,
+		  pt.`postTitle` as postTitle
+		   FROM
+		  pb_comment cm 
+		  LEFT JOIN pb_user u 
+		    ON u.`userUUID` = cm.`userUUID` 
+		    LEFT JOIN pb_post pt 
+		    ON cm.`postUUID` = pt.`postUUID` 
+		WHERE cm.`userUUID` =#{userUUID}
+		group By cm.`cmUUID`
+		LIMIT #{pageIndex},#{everyPageDataCount}
+	</select>
+	<!--删除评论-->
+		<delete id="deleteComment" >
+		DELETE 
+		  cm,
+		  cp
+		FROM
+		   pb_comment cm 
+		  LEFT JOIN pb_comment_praise cp 
+		    ON cm.`cmUUID` = cp.`cmUUID` 
+		WHERE cm.cmUUID  in
+		<foreach item='item' index='index' collection='cmUUID' open='(' separator=',' close=')'>
+		    #{item}
+		 </foreach>
+		</delete>
+	<!--获取点赞列表-->
+	<select id="getPostpraise" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select * from pb_post_praise where postUUID=#{postUUID}
+	</select>
+	<!--获得点赞情况-->
+	<select id="getCommentPraise" parameterType="Map" resultType="java.lang.Integer">
+    SELECT
+    COUNT(*)
+    FROM
+    pb_comment_praise
+    WHERE postUUID = #{postUUID} and cmUUID=#{cmUUID} and userUUID=#{userUUID};
+	</select>
+	<!--增加点赞-->
+	<insert id="addCommentPraise" parameterType="Map">
+		INSERT INTO pb_comment_praise (
+         cmPrUUID,
+         postUUID,
+         cmUUID,
+         userUUID
+        )
+        VALUES
+    (#{cmPrUUID},#{postUUID},#{cmUUID},#{userUUID}) ;
+	</insert>
+	<!--添加评论-->
+	<insert id="addCom" >
+		INSERT INTO pb_comment (cmUUID,postUUID,userUUID,cmText,cmAudio,cmTime)
+   VALUES (#{cmUUID},#{postUUID},#{userUUID},#{cmText},#{cmAudio},#{cmTime})
+	</insert>
+	<!--是否给文章点赞-->
+	<select id="getPostCommentPraise" parameterType="Map" resultType="java.lang.Integer">
+		SELECT
+       COUNT(*)
+       FROM
+       pb_post_praise
+       WHERE postUUID = #{postUUID} and userUUID=#{userUUID}
+	</select>
+	<!-- 增加文章点赞记录-->
+	<insert id="addPostCommentPraise" parameterType="Map">
+		INSERT INTO pb_post_praise (poPrUUID, postUUID, userUUID)
+        VALUES
+        (#{poPrUUID},#{postUUID},#{userUUID})
+	</insert>
+	<!--获得文章赞数-->
+	<select id="getPostPraiseNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT
+       COUNT(*)
+       FROM
+       pb_post_praise
+       WHERE postUUID = #{postUUID}
+	</select>
+	<!--查询总评数-->
+	<select id="getAllNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT count(*) FROM pb_comment  WHERE userUUID=#{userUUID};
+	</select>
+	<!--查找评论-->
+	<select id="getCommentOne" parameterType="Map" resultMap="BaseResultMap">
+		select * from pb_comment  WHERE userUUID=#{userUUID} and cmUUID=#{cmUUID};
+	</select>
+	<!--更新评论-->
+	<update id="editCom" parameterType="Map">
+		update pb_comment set cmText=#{cmText} WHERE userUUID=#{userUUID} and cmUUID=#{cmUUID};
+	</update>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinasofti.postbar.mapper.PbRegMapper">
+
+    <resultMap id="BaseResultMap" type="com.chinasofti.postbar.pojo.RegisterDto">
+        <id column="regUUID" property="regUUID" jdbcType="VARCHAR" />
+        <result column="regPhoto" property="regPhoto" jdbcType="VARCHAR" />
+        <result column="regSex" property="regSex" jdbcType="VARCHAR" />
+        <result column="userName" property="userName" jdbcType="VARCHAR" />
+        <result column="regAge" property="regAge" jdbcType="INTEGER" />
+        <result column="regTime" property="regTime" jdbcType="VARCHAR" />
+        <result column="loginTime" property="loginTime" jdbcType="VARCHAR" />
+        <result column="userUUID" property="userUUID" jdbcType="VARCHAR" />
+        <result column="regEmial" property="regEmial" jdbcType="VARCHAR" />
+        <result column="admin" property="admin" jdbcType="VARCHAR" />
+    </resultMap>
+
+<!-- 查询用户注册信息 -->
+    <select id="getRegisterByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+select * from pb_register where userUUID=#{uuid}
+</select>
+<!-- 查询用户注册信息列表 -->
+    <select id="selectPostList" parameterType="Map" resultMap="BaseResultMap">
+        SELECT a.userUUID as userUUID ,c.regAge as regAge ,c.regSex as regSex,c.regTime as regTime,c.regEmial as  regEmial ,a.userUUID as userUUID,a.userName as userName,a.loginTime as loginTime,a.admin as admin   
+        FROM (pb_user AS a LEFT JOIN (SELECT b.regAge,b.regSex,b.regTime,b.regEmial,b.userUUID FROM pb_register AS b ) AS c ON a.userUUID=c.userUUID)
+        <if test="userName!=null and userName !='' ">
+            WHERE a.userName LIKE CONCAT('%',#{userName},'%')
+        </if>
+        <if test="userName==null or userName==''">
+        <if test="userUUID!=null and userUUID!=''">
+            WHERE a.userUUID=#{userUUID}
+        </if>
+        </if>
+        <if test="userName!=null and userName !=''">
+        <if test="userUUID!=null and userUUID !=''">
+            AND a.userUUID=#{userUUID}
+        </if>
+        </if>
+        ORDER BY a.loginTime DESC
+        LIMIT #{startNo},#{pageSize}
+    </select>
+    <!-- 用户注册 -->
+    <insert id="insertRegister" >
+	INSERT INTO pb_register (regUUID,
+	                         userUUID,
+	                         regSex,
+	                         regAge,
+	                         regEmial,
+	                         regPhoto,
+	                         regTime)
+	VALUES (#{regUUID},
+	        #{userUUID},
+	        #{regSex},
+	        #{regAge},
+	        #{regEmial},
+	        #{regPhoto},
+	        #{regTime})
+	</insert>
+
+    <!-- 根据用户id获得register信息 -->
+    <select id="getRegid" parameterType="Map" resultMap="BaseResultMap">
+	SELECT * FROM pb_register r,pb_user u
+	WHERE u.`userUUID`=r.`userUUID`
+	AND u.`userUUID`=#{userUUID}
+	</select>
+
+    <!-- 根据id查询头像 -->
+    <select id="getPhotoById" parameterType="java.lang.String" resultMap="BaseResultMap">
+	SELECT r.`regPhoto` FROM pb_register r
+	WHERE r.`userUUID`= #{userUUID}
+	</select>
+
+    <!-- 上传头像 -->
+    <update id="updatePath" >
+	update pb_register
+	set regPhoto=#{urlPath}
+    where userUUID= #{userUUID}
+	</update>
+</mapper>

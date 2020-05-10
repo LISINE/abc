@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinasofti.postbar.mapper.PbAudioMapper">
+    <resultMap type="com.chinasofti.postbar.pojo.AudioDto" id="BaseResultMap">
+        <id column=" userUUID" property=" userUUID" jdbcType="VARCHAR" />
+        <result column="auSetUUID" property="auSetUUID" jdbcType="VARCHAR" />
+        <result column="auSetVoiPer" property="auSetVoiPer" jdbcType="INTEGER" />
+        <result column="auSetSpd" property="auSetSpd" jdbcType="INTEGER" />
+        <result column="auSetPit" property="auSetPit" jdbcType="INTEGER" />
+        <result column="auSetVol`" property="auSetVol`" jdbcType="INTEGER" />
+    </resultMap>
+
+
+    <!-- 根据用户id获得当前用户语音 -->
+    <select id="getAudioByUserUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT * FROM pb_audio dio WHERE dio.`userUUID`=#{uuid}
+    </select>
+
+    <!--更新语音设置 -->
+    <update id="updateAudio" parameterType="Map">
+        UPDATE pb_audio au
+        SET au.`auSetVoiPer`=#{auSetVoiPer},au.`auSetSpd`=#{auSetSpd},au.`auSetPit`=#{auSetPit},au.`auSetVol`=#{auSetVol}, au.`auSetUUID`=#{auSetUUID}
+        where userUUID=#{userUUID}
+    </update>
+
+    <!-- 查询所有语音数量 -->
+    <select id="getAudioByUid" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(*) FROM pb_audio dio WHERE dio.`userUUID`=#{userUUID}
+    </select>
+
+    <!-- 根据用户id查询存在的记录-->
+    <select id="findAudioByUid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT * FROM pb_audio dio WHERE dio.`userUUID`=#{userUUID}
+    </select>
+
+    <!-- 插入用户语音的数据记录 -->
+    <insert id="insertAudio" parameterType="Map">
+        INSERT INTO pb_audio (auSetUUID,userUUID,auSetSpd,auSetPit,auSetVol,auSetVoiPer)
+        VALUES(#{auSetUUID},#{userUUID},#{auSetSpd},#{auSetPit},#{auSetVol},#{auSetVoiPer})
+    </insert>
+
+    <!-- 新增注册用户语音数据 -->
+    <insert id="addAudio">
+        INSERT INTO pb_audio (auSetUUID,userUUID,auSetSpd,auSetPit,auSetVol,auSetVoiPer)
+        VALUES(#{auSetUUID},#{userUUID},#{auSetSpd},#{auSetPit},#{auSetVol},#{auSetVoiPer})
+    </insert>
+
+</mapper>

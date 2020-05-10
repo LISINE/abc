@@ -1,0 +1,92 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinasofti.postbar.mapper.PbLoginMapper">
+    <resultMap type="com.chinasofti.postbar.pojo.UserDto" id="BaseResultMap">
+        <id column=" userUUID" property=" userUUID" jdbcType="VARCHAR" />
+        <result column="userName" property="userName" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="loginTime" property="loginTime" jdbcType="VARCHAR" />
+        <result column="admin" property="admin" jdbcType="VARCHAR" />
+
+    </resultMap>
+
+    <!-- 根据用户id查询用户数据 -->
+    <select id="getUserByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+select * from pb_user u where u.userUUID=#{uuid}
+</select>
+
+    <!-- 根据用户姓名和密码查询用户数据 -->
+    <select id="getgetUserByNameAndPwd" parameterType="Map" resultMap="BaseResultMap">
+select * from pb_user u where userName=#{userName} and password=#{password}
+</select>
+
+    <!-- 用户最后的登陆时间 -->
+    <update id="changeLoginTimeByUsername" parameterType="Map">
+Update pb_user set loginTime=#{loginTime} Where userName=#{userName}
+</update>
+
+    <!-- 查询数据是否存在 -->
+    <select id="getUserNumByUserName" parameterType="java.lang.String" resultType="java.lang.Integer">
+select count(*)  FROM pb_user WHERE userName=#{userName}
+</select>
+
+    <!--添加用户注册数据-->
+    <insert id="insertUser" parameterType="Map">
+INSERT INTO pb_user (userUUID,userName,password,loginTime,admin)
+VALUES (#{userUUID},#{userName},#{password},#{loginTime},#{admin})
+</insert>
+
+    <!-- 更新用户密码 -->
+    <update id="updatePassword" parameterType="Map">
+update pb_user set password=#{password} where username=#{username}
+</update>
+
+    
+
+    <!-- 更新个人信息 -->
+    <update id="updateUser" parameterType="Map">
+UPDATE pb_user u,pb_register re
+SET u.`userName`=#{userName},re.`regSex`=#{regSex},re.`regAge`=#{regAge},re.`regEmial`=#{regEmial}
+WHERE u.`userUUID`=re.`userUUID` AND u.`userName`=#{oldName}
+</update>
+
+    <!-- 查询所有用户数量 -->
+    <select id="selectUserAllNum" parameterType="Map" resultType="java.lang.Integer">
+        SELECT count(*) FROM pb_user
+        <if test="userName!=null and userName !='' ">
+            WHERE userName LIKE CONCAT('%',#{userName},'%')
+            <if test="userUUID!=null and userUUID !='' ">
+                AND userUUID=#{userUUID}
+            </if>
+        </if>
+        <if test="userName==null or userName == ''">
+            <if test="userUUID!=null and userUUID !='' ">
+                WHERE userUUID=#{userUUID}
+            </if>
+        </if>
+    </select>
+
+    
+
+    <!-- 删除用户的数据  -->
+    <delete id="deleteUser" parameterType="Map">
+        DELETE ao,cm,cp,pt,pp,reg,u
+        FROM `pb_audio` ao RIGHT JOIN `pb_comment` cm ON cm.`userUUID` = ao.`userUUID`
+        RIGHT JOIN `pb_comment_praise` cp ON cp.`userUUID` = cm.`userUUID`
+        RIGHT JOIN `pb_post` pt ON pt.`userUUID` = cp.`userUUID`
+        RIGHT JOIN `pb_post_praise` pp ON pp.`userUUID` = pt.`userUUID`
+        RIGHT JOIN `pb_register` reg  ON reg.`userUUID`=pt.`userUUID`
+        RIGHT JOIN    `pb_user` u  ON u.`userUUID`=reg.`userUUID`
+        WHERE u.`userUUID` in
+        <foreach item='item' index='index' collection='userUUID' open='(' separator=',' close=')'>
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 编辑用户 -->
+    <update id="editUser">
+UPDATE pb_user u LEFT JOIN pb_register re  ON u.`userUUID` = re.`userUUID`
+SET u.`userName` = #{userName}, re.`regSex`=#{regSex},re.`regAge`=#{regAge},
+re.`regEmial`=#{regEmial},u.`admin`=#{admin},u.`password`=#{password}
+WHERE u.`userUUID`=#{userUUID}
+</update>
+</mapper>

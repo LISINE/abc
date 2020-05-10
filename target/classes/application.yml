@@ -1,0 +1,20 @@
+#配置服务器的端口号
+server:
+  port: 8080
+  #配置项目访问路径  上下文访问路径
+  servlet:
+    context-path: /postbar
+# 1.导入mybaits的依赖包 2.配置数据库连接信息 3.SpringBoot整合mybatis
+#配置数据库连接信息
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/post_bar?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    username: root
+    password: 123456
+
+#SpringBoot这个mybaits 1.别命名包 2.指定mapper映射文件位置
+mybatis:
+#  type-aliases-package: com.chinasofti.postbar.pojo
+  mapper-locations: classpath:mapper/*Mapper.xml
+
