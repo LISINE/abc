@@ -43,6 +43,26 @@
 		WHERE cm.postUUID =#{uuid}
 	</select>
 
+
+	<!--获取最新评论-->
+	<select id="getLastCommentList" resultMap="BaseResultMap">
+			SELECT
+		  u.`userName` AS userName,
+		  cm.`cmTime` AS cmTime,
+		  cm.`cmText` AS cmText,
+		  cm.`postUUID` AS postUUID,
+		  pt.`postTitle` as postTitle
+		   FROM
+		  pb_comment cm
+		  LEFT JOIN pb_post pt
+		    ON cm.`postUUID` = pt.`postUUID`
+		  LEFT JOIN pb_register reg
+		    ON reg.`userUUID` = pt.`userUUID`
+		  LEFT JOIN pb_user u
+		    ON u.`userUUID` = reg.`userUUID`
+		ORDER BY cm.`cmTime` DESC LIMIT 4
+	</select>
+
 	<!-- 获取热评-->
 	<select id="getHotlistByPostuuid" parameterType="java.lang.String" resultMap="BaseResultMap">
 				SELECT 

@@ -1,6 +1,6 @@
 #配置服务器的端口号
 server:
-  port: 8080
+  port: 8181
   #配置项目访问路径  上下文访问路径
   servlet:
     context-path: /postbar

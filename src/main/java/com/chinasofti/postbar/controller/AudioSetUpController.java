@@ -6,6 +6,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.chinasofti.postbar.basic.controller.BasicController;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 //语音设置
 @Controller
 @RequestMapping("/audioSetUpController")
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
 public class AudioSetUpController extends BasicController{
 	@Autowired
 	private AudioService audioService;

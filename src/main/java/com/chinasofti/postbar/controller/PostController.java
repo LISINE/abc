@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,7 @@ import net.sf.json.JSONObject;
 
 @Controller
 @RequestMapping("/postController")
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
 public class PostController extends BasicController {
 	@Autowired
 	private PostService postservice;
@@ -93,7 +95,22 @@ public class PostController extends BasicController {
 
 		this.writeJson(json.toString(), response);
 	}
+	//获取最新的文章列表
+	@RequestMapping("/getLastPostList")
+	public void getLastPostList( HttpServletRequest request, HttpServletResponse response){
+		HttpSession session = request.getSession();
+		JSONObject json = new JSONObject();
+		json.put("message", "");
+		if (sessionTimeout(request)) {
+			json.put("message", "页面过期，请重新登录");
+		} else {
 
+			List<PostDto>  lastPost = postservice.getLastPostList();
+			System.out.println("查询出的最新文章" + lastPost);
+			json.put("postList", lastPost);
+			}
+		this.writeJson(json.toString(), response);
+	}
 	// 文章添加
 	@RequestMapping("/addPost")
 	public void addPost(HttpServletResponse response, HttpServletRequest request, String postTitle, String postText) {

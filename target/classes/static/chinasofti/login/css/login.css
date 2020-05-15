@@ -15,7 +15,7 @@ body{
 		padding-top: 52.734%;/*图片高度除以宽度，得到此值*/
 		background: url("../login_bg.jpg")center center no-repeat;/*两个center分别为水平和垂直方向的对齐方式*/
 		background-size: 100%;/*背景水平铺满*/
-		filter:blur(3px);/*虚化值，越大越模糊*/
+		filter:blur(1px);/*虚化值，越大越模糊*/
 }
 .content{
 		position: absolute;/*设置内容层绝对定位*/

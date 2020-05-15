@@ -11,6 +11,7 @@ import com.chinasofti.postbar.util.AudioSynthesis;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/commentController")
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
 public class CommentController extends BasicController {
 	@Autowired
   private CommentService commentservice;
@@ -68,6 +70,22 @@ public class CommentController extends BasicController {
 		}
 
 		 this.writeJson(json.toString(), response);
+	}
+	//获得最新的评论
+	@RequestMapping("/getLastCommentList")
+	public  void getLastCommentList(HttpServletResponse response, HttpServletRequest request){
+		HttpSession session = request.getSession();
+		JSONObject json = new JSONObject();
+		json.put("message", "");
+		if (sessionTimeout(request)) {
+			json.put("message", "页面过期，请重新登录");
+		} else {
+
+			List<CommentDto>  lastComment = commentservice.getLastCommentList();
+			System.out.println("查询出的最新评论" + lastComment);
+			json.put("commentList", lastComment);
+		}
+		this.writeJson(json.toString(), response);
 	}
 	//删除评论
 	@RequestMapping("/deleteComment")

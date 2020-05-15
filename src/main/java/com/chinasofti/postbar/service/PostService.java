@@ -20,4 +20,6 @@ void addPost(PostDto postDto);
 	PostDto getPostByuuid(String postUUID);
 	//点击文章阅读+1
 	int getPageViews(String postUUID);
+
+    List<PostDto> getLastPostList();
 }

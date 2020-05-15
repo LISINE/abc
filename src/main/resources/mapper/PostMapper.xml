@@ -10,6 +10,7 @@
 		<result column="userName" property="userName" jdbcType="VARCHAR" />
 		<result column="postTime" property="postTime" jdbcType="VARCHAR" />
 		<result column="cmTime" property="cmTime" jdbcType="VARCHAR" />
+		<result column="postText" property="postText" jdbcType="VARCHAR" />
 		<result column="cmPrNum" property="cmPrNum" jdbcType="VARCHAR" />
 	</resultMap>
 
@@ -42,8 +43,19 @@
     GROUP BY t.`postUUID`
 	limit #{pageIndex},#{everyPageDataCount}
 	</select>
-	
-	
+
+	<!--查询最新的帖子  -->
+	<select id="getLastPostList"  resultMap="BaseResultMap">
+		SELECT
+		t.`postUUID` AS postUUID ,
+		t.`postText` AS postText,
+		t.`postTitle` AS postTitle,
+		u.`userName` AS userName,
+		t.`postTime` AS postTime
+		FROM  pb_post t LEFT JOIN pb_user u
+		ON u.`userUUID`=t.`userUUID`
+		ORDER BY t.`postTime` DESC LIMIT 4
+	</select>
 	<select id="getPostAllNum"  parameterType="Map" resultType="java.lang.Integer">
 	SELECT COUNT(*) FROM
     pb_post	

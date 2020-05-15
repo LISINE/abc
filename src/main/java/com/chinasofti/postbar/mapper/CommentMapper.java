@@ -41,4 +41,6 @@ public interface CommentMapper {
 	public CommentDto getCommentOne(@Param("cmUUID")String cmUUID, @Param("userUUID")String userUUID);
 	//更新评论
 	public void editCom(@Param("cmUUID")String cmUUID, @Param("userUUID")String userUUID, @Param("cmText")String cmText);
+
+	List<CommentDto> getLastCommentList();
 }

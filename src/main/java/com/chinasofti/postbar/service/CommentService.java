@@ -41,4 +41,6 @@ public interface CommentService {
 	void editCom(String userUUID, String cmUUID, String cmText);
 
 
+
+	List<CommentDto> getLastCommentList();
 }

@@ -98,4 +98,10 @@ public void editCom(String userUUID, String cmUUID, String cmText) {
 	// TODO Auto-generated method stub
 	 commentMapper.editCom(cmUUID, userUUID,cmText);
 }
+
+	@Override
+	public List<CommentDto> getLastCommentList() {
+		return commentMapper.getLastCommentList();
+	}
+
 }

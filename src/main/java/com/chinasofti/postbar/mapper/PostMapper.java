@@ -21,6 +21,7 @@ public interface PostMapper {
 	PostDto getPostByuuid(@Param("postUUID")String postUUID);
 	//阅读数+1
 	int getPageViews(@Param("postUUID")String postUUID);
-		
 
+
+    List<PostDto> getLastPostList();
 }

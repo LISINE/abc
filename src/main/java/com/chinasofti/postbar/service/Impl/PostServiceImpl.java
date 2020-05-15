@@ -64,6 +64,10 @@ private PostMapper postmapper;
 		return postmapper.getPageViews(postUUID);
 	}
 
-	
+	@Override
+	public List<PostDto> getLastPostList() {
+		return postmapper.getLastPostList();
+	}
+
 
 }
